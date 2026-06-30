@@ -1,0 +1,14 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  action-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate action metadata YAML
+        run: ruby -e 'require "yaml"; YAML.load_file("action.yml")'

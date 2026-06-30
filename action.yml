@@ -1,0 +1,138 @@
+name: "9to5 Coverage"
+description: "Upload a coverage artifact and submit it to 9to5 Coverage."
+
+inputs:
+  token:
+    description: "9to5 Coverage upload token."
+    required: true
+  path:
+    description: "Path to the LCOV or Cobertura coverage file."
+    required: true
+  endpoint:
+    description: "Base URL for the 9to5 Coverage app."
+    required: true
+  artifact-name:
+    description: "Name for the GitHub Actions artifact."
+    required: false
+    default: "9to5-coverage"
+  retention-days:
+    description: "Number of days GitHub should retain the uploaded artifact."
+    required: false
+    default: "7"
+
+outputs:
+  coverage-run-id:
+    description: "9to5 Coverage run ID."
+    value: ${{ steps.submit.outputs.coverage-run-id }}
+  project-coverage:
+    description: "Project coverage percentage."
+    value: ${{ steps.submit.outputs.project-coverage }}
+  patch-coverage:
+    description: "Patch coverage percentage."
+    value: ${{ steps.submit.outputs.patch-coverage }}
+  project-conclusion:
+    description: "Project coverage conclusion."
+    value: ${{ steps.submit.outputs.project-conclusion }}
+  patch-conclusion:
+    description: "Patch coverage conclusion."
+    value: ${{ steps.submit.outputs.patch-conclusion }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Validate coverage file
+      shell: bash
+      env:
+        COVERAGE_PATH: ${{ inputs.path }}
+      run: |
+        set -euo pipefail
+
+        if [ ! -f "${COVERAGE_PATH}" ]; then
+          echo "Coverage file not found: ${COVERAGE_PATH}" >&2
+          exit 1
+        fi
+
+    - name: Upload coverage artifact
+      id: upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.path }}
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
+
+    - name: Submit coverage artifact
+      id: submit
+      shell: bash
+      env:
+        COVERAGE_UPLOAD_TOKEN: ${{ inputs.token }}
+        COVERAGE_ENDPOINT: ${{ inputs.endpoint }}
+        COVERAGE_PATH: ${{ inputs.path }}
+        ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+        ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+        ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+        REPOSITORY: ${{ github.repository }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        DEFAULT_SHA: ${{ github.sha }}
+        HEAD_BRANCH: ${{ github.head_ref }}
+        REF_BRANCH: ${{ github.ref_name }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        BASE_BRANCH: ${{ github.base_ref || github.event.repository.default_branch }}
+        PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -euo pipefail
+
+        payload_file="$(mktemp)"
+        response_file="$(mktemp)"
+
+        python3 - "${payload_file}" <<'PY'
+        import json
+        import os
+        import sys
+
+        payload = {
+            "commit_sha": os.environ.get("HEAD_SHA") or os.environ["DEFAULT_SHA"],
+            "branch": os.environ.get("HEAD_BRANCH") or os.environ["REF_BRANCH"],
+            "base_sha": os.environ.get("BASE_SHA") or "",
+            "base_branch": os.environ.get("BASE_BRANCH") or "",
+            "pull_request_number": os.environ.get("PULL_REQUEST_NUMBER") or "",
+            "run_url": os.environ["RUN_URL"],
+            "artifact_url": os.environ["ARTIFACT_URL"],
+            "artifact_id": os.environ["ARTIFACT_ID"],
+            "artifact_name": os.environ["ARTIFACT_NAME"],
+            "artifact_digest": os.environ["ARTIFACT_DIGEST"],
+            "coverage_path": os.environ["COVERAGE_PATH"],
+        }
+
+        with open(sys.argv[1], "w", encoding="utf-8") as handle:
+            json.dump(payload, handle)
+        PY
+
+        endpoint="${COVERAGE_ENDPOINT%/}"
+
+        curl -fsS -X POST "${endpoint}/api/v1/repos/${REPOSITORY}/coverage" \
+          -H "Authorization: Bearer ${COVERAGE_UPLOAD_TOKEN}" \
+          -H "Content-Type: application/json" \
+          --data-binary @"${payload_file}" \
+          -o "${response_file}"
+
+        python3 - "${response_file}" >> "${GITHUB_OUTPUT}" <<'PY'
+        import json
+        import sys
+
+        with open(sys.argv[1], "r", encoding="utf-8") as handle:
+            response = json.load(handle)
+
+        outputs = {
+            "coverage-run-id": response.get("coverage_run_id", ""),
+            "project-coverage": response.get("project_coverage", ""),
+            "patch-coverage": response.get("patch_coverage", ""),
+            "project-conclusion": response.get("project_conclusion", ""),
+            "patch-conclusion": response.get("patch_conclusion", ""),
+        }
+
+        for name, value in outputs.items():
+            print(f"{name}={value}")
+        PY
