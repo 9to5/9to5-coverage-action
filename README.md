@@ -18,7 +18,7 @@ jobs:
     if: github.event_name == 'pull_request' || github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: npm ci
       - run: npm test -- --coverage --coverageReporters=lcov
       - name: Upload coverage
@@ -30,23 +30,23 @@ jobs:
 
 ## Inputs
 
-| Input | Required | Default | Description |
-| --- | --- | --- | --- |
-| `token` | yes | | 9to5 Coverage upload token. |
-| `path` | yes | | Path to the LCOV or Cobertura file. |
-| `endpoint` | no | `https://coverage.9to5.software/` | Base URL for the 9to5 Coverage app. |
-| `artifact-name` | no | `9to5-coverage` | Name for the GitHub Actions artifact. |
-| `retention-days` | no | `7` | Number of days GitHub should retain the artifact. |
+| Input            | Required | Default                           | Description                                       |
+| ---------------- | -------- | --------------------------------- | ------------------------------------------------- |
+| `token`          | yes      |                                   | 9to5 Coverage upload token.                       |
+| `path`           | yes      |                                   | Path to the LCOV or Cobertura file.               |
+| `endpoint`       | no       | `https://coverage.9to5.software/` | Base URL for the 9to5 Coverage app.               |
+| `artifact-name`  | no       | `9to5-coverage`                   | Name for the GitHub Actions artifact.             |
+| `retention-days` | no       | `7`                               | Number of days GitHub should retain the artifact. |
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
-| `coverage-run-id` | 9to5 Coverage run ID. |
-| `project-coverage` | Project coverage percentage. |
-| `patch-coverage` | Patch coverage percentage. |
+| Output               | Description                  |
+| -------------------- | ---------------------------- |
+| `coverage-run-id`    | 9to5 Coverage run ID.        |
+| `project-coverage`   | Project coverage percentage. |
+| `patch-coverage`     | Patch coverage percentage.   |
 | `project-conclusion` | Project coverage conclusion. |
-| `patch-conclusion` | Patch coverage conclusion. |
+| `patch-conclusion`   | Patch coverage conclusion.   |
 
 ## Language Examples
 
