@@ -10,7 +10,8 @@ inputs:
     required: true
   endpoint:
     description: "Base URL for the 9to5 Coverage app."
-    required: true
+    required: false
+    default: "https://coverage.9to5.software/"
   artifact-name:
     description: "Name for the GitHub Actions artifact."
     required: false

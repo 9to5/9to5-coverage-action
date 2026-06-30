@@ -4,7 +4,7 @@ Upload an LCOV or Cobertura coverage file as a GitHub Actions artifact, then sub
 
 ## Usage
 
-Store your 9to5 Coverage upload token as `COVERAGE_UPLOAD_TOKEN` and set `COVERAGE_UPLOAD_URL` to your 9to5 Coverage app URL.
+Store your 9to5 Coverage upload token as `COVERAGE_UPLOAD_TOKEN`.
 
 ```yaml
 name: coverage
@@ -25,7 +25,6 @@ jobs:
         uses: 9to5/9to5-coverage-action@v1
         with:
           token: ${{ secrets.COVERAGE_UPLOAD_TOKEN }}
-          endpoint: ${{ vars.COVERAGE_UPLOAD_URL }}
           path: coverage/lcov.info
 ```
 
@@ -35,7 +34,7 @@ jobs:
 | --- | --- | --- | --- |
 | `token` | yes | | 9to5 Coverage upload token. |
 | `path` | yes | | Path to the LCOV or Cobertura file. |
-| `endpoint` | yes | | Base URL for the 9to5 Coverage app. |
+| `endpoint` | no | `https://coverage.9to5.software/` | Base URL for the 9to5 Coverage app. |
 | `artifact-name` | no | `9to5-coverage` | Name for the GitHub Actions artifact. |
 | `retention-days` | no | `7` | Number of days GitHub should retain the artifact. |
 
@@ -59,7 +58,6 @@ JavaScript and TypeScript:
   uses: 9to5/9to5-coverage-action@v1
   with:
     token: ${{ secrets.COVERAGE_UPLOAD_TOKEN }}
-    endpoint: ${{ vars.COVERAGE_UPLOAD_URL }}
     path: coverage/lcov.info
 ```
 
@@ -71,7 +69,6 @@ Python:
   uses: 9to5/9to5-coverage-action@v1
   with:
     token: ${{ secrets.COVERAGE_UPLOAD_TOKEN }}
-    endpoint: ${{ vars.COVERAGE_UPLOAD_URL }}
     path: coverage.xml
 ```
 
@@ -84,7 +81,6 @@ Java:
   uses: 9to5/9to5-coverage-action@v1
   with:
     token: ${{ secrets.COVERAGE_UPLOAD_TOKEN }}
-    endpoint: ${{ vars.COVERAGE_UPLOAD_URL }}
     path: coverage/Cobertura.xml
 ```
 
@@ -96,7 +92,6 @@ PHP:
   uses: 9to5/9to5-coverage-action@v1
   with:
     token: ${{ secrets.COVERAGE_UPLOAD_TOKEN }}
-    endpoint: ${{ vars.COVERAGE_UPLOAD_URL }}
     path: coverage/cobertura.xml
 ```
 
@@ -109,7 +104,6 @@ Go:
   uses: 9to5/9to5-coverage-action@v1
   with:
     token: ${{ secrets.COVERAGE_UPLOAD_TOKEN }}
-    endpoint: ${{ vars.COVERAGE_UPLOAD_URL }}
     path: coverage.lcov
 ```
 
