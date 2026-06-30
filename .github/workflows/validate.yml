@@ -9,7 +9,7 @@ jobs:
   action-metadata:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install test dependencies
         run: python3 -m pip install --user --disable-pip-version-check PyYAML
       - name: Validate action metadata YAML
