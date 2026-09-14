@@ -1,6 +1,10 @@
 name: "9to5 coverage"
 description: "Upload a coverage artifact and submit it to 9to5 coverage."
 
+branding:
+  color: green
+  icon: book
+
 inputs:
   token:
     description: "9to5 coverage upload token."
