@@ -1,15 +1,15 @@
-name: "9to5 Coverage"
-description: "Upload a coverage artifact and submit it to 9to5 Coverage."
+name: "9to5 coverage"
+description: "Upload a coverage artifact and submit it to 9to5 coverage."
 
 inputs:
   token:
-    description: "9to5 Coverage upload token."
+    description: "9to5 coverage upload token."
     required: true
   path:
     description: "Path to the LCOV or Cobertura coverage file."
     required: true
   endpoint:
-    description: "Base URL for the 9to5 Coverage app."
+    description: "Base URL for the 9to5 coverage app."
     required: false
     default: "https://coverage.9to5.software/"
   artifact-name:
@@ -23,7 +23,7 @@ inputs:
 
 outputs:
   coverage-run-id:
-    description: "9to5 Coverage run ID."
+    description: "9to5 coverage run ID."
     value: ${{ steps.submit.outputs.coverage-run-id }}
   project-coverage:
     description: "Project coverage percentage."

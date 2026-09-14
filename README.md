@@ -1,10 +1,12 @@
-# 9to5 Coverage Action
+# 9to5 coverage Action
 
-Upload an LCOV or Cobertura coverage file as a GitHub Actions artifact, then submit that artifact URL to 9to5 Coverage for processing.
+Upload an LCOV or Cobertura coverage file as a GitHub Actions artifact, then submit that artifact URL to 9to5 coverage for processing.
+
+Homepage: [9to5 coverage](https://coverage.9to5.software)
 
 ## Usage
 
-Store your 9to5 Coverage upload token as `COVERAGE_UPLOAD_TOKEN`.
+Store your 9to5 coverage upload token as `COVERAGE_UPLOAD_TOKEN`.
 
 ```yaml
 name: coverage
@@ -32,9 +34,9 @@ jobs:
 
 | Input            | Required | Default                           | Description                                       |
 | ---------------- | -------- | --------------------------------- | ------------------------------------------------- |
-| `token`          | yes      |                                   | 9to5 Coverage upload token.                       |
+| `token`          | yes      |                                   | 9to5 coverage upload token.                       |
 | `path`           | yes      |                                   | Path to the LCOV or Cobertura file.               |
-| `endpoint`       | no       | `https://coverage.9to5.software/` | Base URL for the 9to5 Coverage app.               |
+| `endpoint`       | no       | `https://coverage.9to5.software/` | Base URL for the 9to5 coverage app.               |
 | `artifact-name`  | no       | `9to5-coverage`                   | Name for the GitHub Actions artifact.             |
 | `retention-days` | no       | `7`                               | Number of days GitHub should retain the artifact. |
 
@@ -42,7 +44,7 @@ jobs:
 
 | Output               | Description                  |
 | -------------------- | ---------------------------- |
-| `coverage-run-id`    | 9to5 Coverage run ID.        |
+| `coverage-run-id`    | 9to5 coverage run ID.        |
 | `project-coverage`   | Project coverage percentage. |
 | `patch-coverage`     | Patch coverage percentage.   |
 | `project-conclusion` | Project coverage conclusion. |
@@ -109,13 +111,13 @@ Go:
 
 ## What The Action Sends
 
-The action uploads your coverage file with `actions/upload-artifact@v7`, then submits the artifact URL, artifact ID, digest, run URL, commit SHA, branch, base branch, base SHA, and pull request number to 9to5 Coverage.
+The action uploads your coverage file with `actions/upload-artifact@v7`, then submits the artifact URL, artifact ID, digest, run URL, commit SHA, branch, base branch, base SHA, and pull request number to 9to5 coverage.
 
-9to5 Coverage downloads the artifact through the installed GitHub App and processes the coverage file server-side.
+9to5 coverage downloads the artifact through the installed GitHub App and processes the coverage file server-side.
 
 ## Troubleshooting
 
 - `Coverage file not found`: confirm the coverage command writes the file at the path passed to `path`.
-- `401 invalid upload token`: rotate the repository or organization token in 9to5 Coverage and update `COVERAGE_UPLOAD_TOKEN`.
-- `artifact_url must belong to the requested repository`: confirm the workflow runs in the repository connected to 9to5 Coverage.
+- `401 invalid upload token`: rotate the repository or organization token in 9to5 coverage and update `COVERAGE_UPLOAD_TOKEN`.
+- `artifact_url must belong to the requested repository`: confirm the workflow runs in the repository connected to 9to5 coverage.
 - `coverage file was not found in the artifact`: confirm `path` points to the generated LCOV or Cobertura file.
