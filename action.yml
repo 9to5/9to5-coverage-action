@@ -12,6 +12,10 @@ inputs:
   path:
     description: "Path to the LCOV or Cobertura coverage file."
     required: true
+  report-scope:
+    description: "Optional report identity: android or ios. Empty preserves legacy checks."
+    required: false
+    default: ""
   endpoint:
     description: "Base URL for the 9to5 coverage app."
     required: false
@@ -77,6 +81,9 @@ runs:
         ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
         ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
         ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+        REPORT_SCOPE: ${{ inputs.report-scope }}
+        EVENT_NAME: ${{ github.event_name }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         REPOSITORY: ${{ github.repository }}
         HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         DEFAULT_SHA: ${{ github.sha }}
@@ -96,6 +103,28 @@ runs:
         import json
         import os
         import sys
+        import re
+        import subprocess
+
+        scope = os.environ.get("REPORT_SCOPE", "")
+        head = os.environ.get("HEAD_SHA") or os.environ["DEFAULT_SHA"]
+        branch = os.environ.get("HEAD_BRANCH") or os.environ["REF_BRANCH"]
+        if scope not in ("", "android", "ios"):
+            raise SystemExit("Invalid report-scope: expected android or ios")
+        if os.environ.get("EVENT_NAME") == "pull_request":
+            required = ("HEAD_SHA", "HEAD_BRANCH", "BASE_SHA", "BASE_BRANCH", "PULL_REQUEST_NUMBER")
+            if any(not os.environ.get(key) for key in required):
+                raise SystemExit("Missing PR coverage metadata")
+            if not re.fullmatch(r"[0-9a-f]{40}", os.environ["BASE_SHA"]) or not re.fullmatch(r"[1-9][0-9]*", os.environ["PULL_REQUEST_NUMBER"]):
+                raise SystemExit("Invalid PR base SHA or number")
+        if scope:
+            if not re.fullmatch(r"[0-9a-f]{40}", head) or not branch:
+                raise SystemExit("Invalid coverage commit or branch")
+            if not os.environ.get("PULL_REQUEST_NUMBER") and branch != os.environ.get("DEFAULT_BRANCH"):
+                raise SystemExit("Scoped feature-branch uploads require PR metadata; dispatch the main branch for baselines")
+            checkout = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+            if checkout != head:
+                raise SystemExit("Coverage checkout differs from the reported head commit")
 
         payload = {
             "commit_sha": os.environ.get("HEAD_SHA") or os.environ["DEFAULT_SHA"],
@@ -110,6 +139,9 @@ runs:
             "artifact_digest": os.environ["ARTIFACT_DIGEST"],
             "coverage_path": os.environ["COVERAGE_PATH"],
         }
+
+        if scope:
+            payload["report_scope"] = scope
 
         with open(sys.argv[1], "w", encoding="utf-8") as handle:
             json.dump(payload, handle)

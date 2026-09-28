@@ -121,3 +121,12 @@ The action uploads your coverage file with `actions/upload-artifact@v7`, then su
 - `401 invalid upload token`: rotate the repository or organization token in 9to5 coverage and update `COVERAGE_UPLOAD_TOKEN`.
 - `artifact_url must belong to the requested repository`: confirm the workflow runs in the repository connected to 9to5 coverage.
 - `coverage file was not found in the artifact`: confirm `path` points to the generated LCOV or Cobertura file.
+# Independent Android and iOS reports
+
+Set optional `report-scope: android` or `report-scope: ios` after the coverage service
+supports scopes. The action submits that identity with the existing PR/base metadata.
+Each platform receives separate patch/project checks and baselines; omit the input to
+preserve legacy behavior. Scoped jobs must check out
+`${{ github.event.pull_request.head.sha || github.sha }}`. Main pushes and manual runs
+on the default branch create baseline reports; a manual feature-branch run without PR
+metadata is rejected. Upload acceptance is not confirmation of the final coverage check.
