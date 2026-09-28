@@ -24,6 +24,9 @@ assert_equal(False, endpoint["required"], "endpoint should be optional")
 assert_equal("https://coverage.9to5.software/", endpoint["default"], "endpoint default")
 assert_equal(True, inputs["token"]["required"], "token should be required")
 assert_equal(True, inputs["path"]["required"], "path should be required")
+assert_equal(False, inputs["component"]["required"], "component should be optional")
+assert_equal(None, inputs["component"].get("default"), "no default component")
+assert_equal("9to5-coverage", inputs["artifact-name"]["default"], "legacy artifact name")
 
 upload_step = next(
     (step for step in action["runs"]["steps"] if step.get("id") == "upload"),
@@ -34,6 +37,7 @@ if upload_step is None:
 
 assert_equal("actions/upload-artifact@v7", upload_step["uses"], "upload artifact action")
 assert_equal("error", upload_step["with"]["if-no-files-found"], "missing files behavior")
+assert_equal("${{ inputs.artifact-name }}", upload_step["with"]["name"], "artifact name override")
 
 submit_step = next(
     (step for step in action["runs"]["steps"] if step.get("id") == "submit"),
@@ -42,6 +46,11 @@ submit_step = next(
 if submit_step is None:
     raise AssertionError("submit step exists")
 
+assert_equal(
+    "${{ inputs.component }}",
+    submit_step["env"]["COVERAGE_COMPONENT"],
+    "submit component env",
+)
 assert_equal(
     "${{ inputs.endpoint }}",
     submit_step["env"]["COVERAGE_ENDPOINT"],
