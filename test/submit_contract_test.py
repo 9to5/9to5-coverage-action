@@ -139,8 +139,17 @@ try:
         {**legacy, "commit_sha": "b" * 40, "branch": "main", "base_sha": "", "pull_request_number": ""},
     )
 
-    for status, code in ((401, "invalid_token"), (422, "invalid_component"), (422, "invalid_configuration"), (500, "internal_error")):
-        response = {"error": code}
+    for status, code in (
+        (401, "invalid_token"),
+        (422, "component_required"),
+        (422, "unexpected_component"),
+        (422, "unknown_component"),
+        (422, "invalid_component_config"),
+        (503, "configuration_unavailable"),
+        (503, "monorepo_disabled"),
+        (500, "internal_error"),
+    ):
+        response = {"code": code, "error": "Upload rejected by service fixture"}
         run({"COVERAGE_COMPONENT": "unknown"}, {**legacy, "component": "unknown"})
 
     status = 200

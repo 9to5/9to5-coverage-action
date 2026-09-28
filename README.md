@@ -55,7 +55,7 @@ Artifact submissions are asynchronous. A successful `status: queued` response me
 
 ## Monorepositories
 
-**Release prerequisite:** component uploads require the service implementation in [9to5-coverage#79](https://github.com/9to5/9to5-coverage/issues/79). Do not publish a component-capable action release or move the `v1` tag until that API is available. The examples below describe that capability; use an action version that includes it.
+Component uploads use the service's [monorepository configuration and upload contract](https://coverage.9to5.software/docs#docs-monorepositories). Use an action version that includes the `component` input.
 
 Define components in `.9to5-coverage.json` at the repository root. For example, two independent components could be:
 
@@ -112,7 +112,7 @@ Give every component job a distinct `artifact-name`, such as `coverage-api` and 
 
 The initial configured commit needs fresh reports for **all** components. Later, only the service can verify whether an unchanged component's earlier measurement can be carried forward. Changes to declared dependencies require fresh dependant reports; changes outside component roots or to configuration can require all reports. A missing or failed job is never evidence that reuse is safe. Carry-forward does not mean tests ran on the current commit. This action does not detect affected paths, skip jobs, or parse configuration.
 
-See the [service API documentation](https://coverage.9to5.software/docs#api-reference) for response semantics. Generic configuration, the mobile/shared-library dependency example, path rules, and carry-forward requirements are specified in the [service component contract](https://github.com/9to5/9to5-coverage/issues/79); its public monorepository documentation is part of that pending service delivery.
+See the [service API documentation](https://coverage.9to5.software/docs#api-reference) for response semantics and the [monorepository documentation](https://coverage.9to5.software/docs#docs-monorepositories) for generic configuration, the mobile/shared-library dependency example, path rules, and carry-forward requirements.
 
 ## Language Examples
 
