@@ -12,6 +12,9 @@ inputs:
   path:
     description: "Path to the LCOV or Cobertura coverage file."
     required: true
+  component:
+    description: "Component ID from the repository's .9to5-coverage.json configuration."
+    required: false
   endpoint:
     description: "Base URL for the 9to5 coverage app."
     required: false
@@ -74,6 +77,7 @@ runs:
         COVERAGE_ENDPOINT: ${{ inputs.endpoint }}
         COVERAGE_PATH: ${{ inputs.path }}
         ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        COVERAGE_COMPONENT: ${{ inputs.component }}
         ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
         ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
         ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
@@ -110,6 +114,9 @@ runs:
             "artifact_digest": os.environ["ARTIFACT_DIGEST"],
             "coverage_path": os.environ["COVERAGE_PATH"],
         }
+
+        if os.environ.get("COVERAGE_COMPONENT"):
+            payload["component"] = os.environ["COVERAGE_COMPONENT"]
 
         with open(sys.argv[1], "w", encoding="utf-8") as handle:
             json.dump(payload, handle)
